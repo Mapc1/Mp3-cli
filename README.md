@@ -1,4 +1,4 @@
-#Mp3-cli
+# Mp3-cli
 
 This is a simple cli mp3 player.
 
