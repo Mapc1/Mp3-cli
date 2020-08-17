@@ -1,1 +1,8 @@
+#Executable
 mp3-cli
+
+#Cmake stuff
+cmake*
+CMake*
+
+.idea
