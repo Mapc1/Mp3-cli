@@ -42,6 +42,5 @@ int main (int argc, const char *argv[]) {
             mpg123_read (handle, buffer, 1024, &decoded);
         }
     }
-Exit:
     return 0;
 }
