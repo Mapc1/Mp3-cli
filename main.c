@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <errno.h>
 #include <mpg123.h>
-#include <fmt123.h>
 #include <pulse/simple.h>
 #include <string.h>
+
+void printHelp () {
+    printf ("Usage: mp3-cli [OPTION]... [FILE]...\nPlays an mp3 file.\n     -h, --help       Display this message\n     -m, --mono       Set audio channel to mono\n     -b=, --bitrate=  Set bitrate\n");
+}
 
 void strcpyOffset (char *src, char *dst, int offset) {
     int i;
@@ -25,10 +28,14 @@ char *getModes (int argc,char *argv[], pa_sample_spec *ss) {
         else if (strncmp (argv[i], "-b=", 3) == 0){
             strcpyOffset (argv[i], dup, 3);
             ss->rate = atoi (dup);
-        }
+        } //These need to be split because of 'strcpyOffset'
         else if (strncmp (argv[i], "--bitrate=", 10) == 0) {
             strcpyOffset (argv[i], dup, 10);
             ss->rate = atoi (dup);
+        }
+        else if (strcmp (argv[i], "-h") == 0 || strcmp (argv[i], "--help") == 0){
+            printHelp ();
+            exit (0);
         }
         else if (argv[i][0] != '-')
             filePATH = argv[i];
@@ -51,8 +58,8 @@ int main (int argc, const char *argv[]) {
     pa_sample_spec ss;
 
     if (argc == 1){
-        fprintf (stdout, "Usage: mp3-cli [OPTION]... [FILE]...\nPlays an mp3 file.\n     -m, --mono      Set audio channel to mono\n     -b=, --bitrate=  Set bitrate\n");
-        goto Exit;
+        printHelp ();
+        exit (1);
     }
     
     ss.format = PA_SAMPLE_S16NE;
