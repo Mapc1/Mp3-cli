@@ -15,8 +15,6 @@ int main (int argc, const char *argv[]) {
     size_t decoded = 1;
     pa_simple *s;
     pa_sample_spec ss;
-    int seek;
-
 
     if (argc == 1){
         printHelp ();
