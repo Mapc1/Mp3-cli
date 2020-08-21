@@ -23,8 +23,10 @@ void printHelp () {
     printf ("Usage: mp3-cli [OPTION]... [FILE]...\nPlays an mp3 file.\n     -h, --help       Display this message\n     -m, --mono       Set audio channel to mono\n     -b=, --bitrate=  Set bitrate\n");
 }
 
-void strcpyOffset (char *src, char *dst, int offset) {
+void strcpyEqual (char *src, char *dst) {
     int i;
+    int offset;
+    for (offset = 0; src[offset - 1] != '='; offset++);
     for (i = 0; src[offset] != '\0'; offset++, i++)
         dst[i] = src[offset];
     dst[i] = '\0';
@@ -42,30 +44,19 @@ void getModes (int argc,char *argv[], pa_sample_spec *ss, char filePATH[5000][10
             ss->channels = 1;
             ss->rate *= 2;
         }
-        else if (strncmp (argv[i], "-b=", 3) == 0){
-            strcpyOffset (argv[i], dup, 3);
-            ss->rate = atoi (dup);
-        } //These need to be split because of 'strcpyOffset'
-        else if (strncmp (argv[i], "--bitrate=", 10) == 0) {
-            strcpyOffset (argv[i], dup, 10);
+        else if (strncmp (argv[i], "-b=", 3) == 0 || strncmp (argv[i], "--bitrate=", 10) == 0){
+            strcpyEqual (argv[i], dup);
             ss->rate = atoi (dup);
         }
         else if (strcmp (argv[i], "-h") == 0 || strcmp (argv[i], "--help") == 0){
             printHelp ();
             exit (0);
         }
-        else if (strncmp (argv[i], "-p=", 3) == 0){
-            strcpyOffset (argv[i], dup, 3);
+        else if (strncmp (argv[i], "-p=", 3) == 0 || strncmp (argv[i], "--playlist=", 11) == 0){
+            strcpyEqual (argv[i], dup);
             directory = opendir (dup);
             for (int index = 0; (de = readdir (directory)) != NULL; index++)
                 prependstr (dup, de->d_name, filePATH[index]); 
-        }
-        else if (strncmp (argv[i], "--playlist=", 11) == 0){
-            strcpyOffset (argv[i], dup, 11);
-            directory = opendir (dup);
-            for (int index = 0; (de = readdir (directory)) != NULL; index++){
-                prependstr (dup, de->d_name, filePATH[index]);
-            }
         }
         else if (argv[i][0] != '-')
             strcpy (filePATH[0], argv[i]);

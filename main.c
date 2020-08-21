@@ -15,6 +15,8 @@ int main (int argc, const char *argv[]) {
     size_t decoded = 1;
     pa_simple *s;
     pa_sample_spec ss;
+    int seek;
+
 
     if (argc == 1){
         printHelp ();
@@ -35,11 +37,10 @@ int main (int argc, const char *argv[]) {
 
     for (int index = 0; filePATH[index][0] != '\0'; index++){
         mpg123_open_fixed (handle, filePATH[index], MPG123_STEREO, MPG123_ENC_SIGNED_16);
-        mpg123_read (handle, buffer, 1024, &decoded);
 
         while (decoded > 0) {
-            pa_simple_write (s, buffer, decoded, NULL);
             mpg123_read (handle, buffer, 1024, &decoded);
+            pa_simple_write (s, buffer, decoded, NULL);
         }
     }
     return 0;

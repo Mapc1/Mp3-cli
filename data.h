@@ -6,7 +6,7 @@ void initfilePATH (char filePATH[5000][1024]);
 
 void printHelp ();
 
-void strcpyOffset (char *src, char *dst, int offset);
+void strcpyEqual (char *src, char *dst);
 
 void getModes (int argc,char *argv[], pa_sample_spec *ss, char filePATH[5000][1024]);
 
