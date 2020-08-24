@@ -14,7 +14,8 @@ int main (int argc, const char *argv[]) {
     pa_simple *s;
     pa_sample_spec ss;
     off_t currentFrame, totalFrames;
-    double curTime, frameTime, totalTime;
+    double frameTime, pounds;
+    double curTime, totalTime;
 
     totalFrames = 0;
     currentFrame = 0;
@@ -42,13 +43,19 @@ int main (int argc, const char *argv[]) {
     mpg123_scan (handle);
     totalFrames = mpg123_framelength (handle);
     frameTime = mpg123_tpf (handle);
-    totalTime = frameTime * totalFrames;
+    totalTime = (int) (frameTime * totalFrames);
     while (decoded > 0) {
         mpg123_read (handle, buffer, 1024, &decoded);
         pa_simple_write (s, buffer, decoded, NULL);
         currentFrame = mpg123_tellframe (handle);
-        curTime = frameTime * currentFrame;
-        printf ("%d || %d\n --> %f || %f\n", currentFrame, totalFrames, curTime, totalTime);
+        curTime = (int) (frameTime * currentFrame);
+        pounds = ((double) currentFrame / (double) totalFrames) * 100;
+        printf ("%d[", (int) curTime);
+        for (int i = 0; i < pounds; i++)
+            printf("#");
+        for (; pounds < 100; pounds++)
+            printf(" ");
+        printf("]%d\r",(int) totalTime);
     }
     
 Exit:
