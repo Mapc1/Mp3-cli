@@ -14,9 +14,8 @@ int main (int argc, const char *argv[]) {
     pa_simple *s;
     pa_sample_spec ss;
     off_t currentFrame, totalFrames;
-    double frameTime, pounds;
-    double curTime, totalTime;
-
+    double frameTime, pounds, curTime, totalTime;
+    
     totalFrames = 0;
     currentFrame = 0;
     totalTime = 0;
@@ -39,6 +38,7 @@ int main (int argc, const char *argv[]) {
 
     mpg123_open_fixed (handle, filePATH, MPG123_STEREO, MPG123_ENC_SIGNED_16);
     s = pa_simple_new (NULL, "MP3-cli", PA_STREAM_PLAYBACK, NULL, "Cli mp3 player", &ss, NULL, NULL, NULL);
+        printf("]%d\r",(int) totalTime);
 
     mpg123_scan (handle);
     totalFrames = mpg123_framelength (handle);
