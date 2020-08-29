@@ -8,6 +8,16 @@ void printHelp () {
     printf ("Usage: mp3-cli [OPTION]... [FILE]...\nPlays an mp3 file.\n     -h, --help       Display this message\n     -m, --mono       Set audio channel to mono\n     -b=, --bitrate=  Set bitrate\n");
 }
 
+time *seconds2Time (double sec) {
+    time *time = malloc (sizeof (time));
+    
+    time->hours = sec / 3600;
+    time->minutes = (sec - (3600*time->hours)) / 60;
+    time->seconds = (sec - (3600*time->hours) - (time->minutes*60));
+    
+    return time;
+}
+
 void strcpytillEqual (char *src, char *dst) {
     int i;
     int offset;

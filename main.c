@@ -5,6 +5,16 @@
 #include <string.h>
 #include "data.h"
 
+
+
+void printTime (time *time) {
+    if (time->hours != 0)
+            printf ("%d:", time->hours);
+    if (time->minutes != 0)
+        printf ("%d:", time->minutes);
+    printf ("%d", time->seconds);
+}
+
 int main (int argc, const char *argv[]) { 
     char buffer[1024];
     char *filePATH;
@@ -14,12 +24,12 @@ int main (int argc, const char *argv[]) {
     pa_simple *s;
     pa_sample_spec ss;
     off_t currentFrame, totalFrames;
-    double frameTime, pounds, curTime, totalTime;
+    double frameTime, curSec, totalSec;
     
     totalFrames = 0;
     currentFrame = 0;
-    totalTime = 0;
-    curTime = 0;
+    totalSec = 0;
+    curSec = 0;
     frameTime = 0;
 
     if (argc == 1){
@@ -38,26 +48,26 @@ int main (int argc, const char *argv[]) {
 
     mpg123_open_fixed (handle, filePATH, MPG123_STEREO, MPG123_ENC_SIGNED_16);
     s = pa_simple_new (NULL, "MP3-cli", PA_STREAM_PLAYBACK, NULL, "Cli mp3 player", &ss, NULL, NULL, NULL);
-        printf("]%d\r",(int) totalTime);
 
     mpg123_scan (handle);
     totalFrames = mpg123_framelength (handle);
     frameTime = mpg123_tpf (handle);
-    totalTime = (int) (frameTime * totalFrames);
+    totalSec = (int) (frameTime * totalFrames);
+    time *totalTime = seconds2Time (totalSec);
+    
     while (decoded > 0) {
         mpg123_read (handle, buffer, 1024, &decoded);
         pa_simple_write (s, buffer, decoded, NULL);
+        
         currentFrame = mpg123_tellframe (handle);
-        curTime = (int) (frameTime * currentFrame);
-        pounds = ((double) currentFrame / (double) totalFrames) * 100;
-        printf ("%d[", (int) curTime);
-        for (int i = 0; i < pounds; i++)
-            printf("#");
-        for (; pounds < 100; pounds++)
-            printf(" ");
-        printf("]%d\r",(int) totalTime);
+        curSec = frameTime * currentFrame;
+        time *curTime = seconds2Time (curSec);
+
+        printTime (curTime);
+        printf (" / ");
+        printTime (totalTime);
+        printf ("\r");
     }
-    
-Exit:
+
     return 0;
 }
