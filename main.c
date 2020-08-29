@@ -17,19 +17,27 @@ void printBar (double curSec, double totalSec) {
 }
 
 void printTime (time *curTime, time *totalTime, double curSec, double totalSec) {
-    if (curTime->hours != 0)
-            printf ("%d:", curTime->hours);
-    if (curTime->minutes != 0)
-        printf ("%d:", curTime->minutes);
-    printf ("%d", curTime->seconds);
+    if (totalTime->hours != 0){
+        if (totalTime->hours > 10)
+            printf (curTime->hours < 10 ? "0%d:" : "%d:", curTime->hours);
+        else printf ("%d:", curTime->hours);
+    }
+    if (totalTime->minutes != 0) {
+        if (totalTime->minutes > 10 || totalTime->hours != 0)
+            printf (curTime->minutes < 10 ? "0%d:" : "%d:", curTime->minutes);
+        else printf ("%d:", curTime->minutes);
+    }
+    printf (curTime->seconds < 10 ? "0%d" : "%d", curTime->seconds);
 
     printBar (curSec, totalSec);
 
     if (totalTime->hours != 0)
             printf ("%d:", totalTime->hours);
     if (totalTime->minutes != 0)
-        printf ("%d:", totalTime->minutes);
-    printf ("%d", totalTime->seconds);
+        if (totalTime->hours != 0)
+            printf (totalTime->minutes < 10 ? "0%d:" : "%d:", totalTime->minutes);
+        else printf ("%d:", totalTime->minutes);
+    printf (totalTime->seconds < 10 ? "0%d" : "%d", totalTime->seconds);
 }
 
 int main (int argc, const char *argv[]) { 
