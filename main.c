@@ -5,14 +5,31 @@
 #include <string.h>
 #include "data.h"
 
+void printBar (double curSec, double totalSec) {
+    double fill = (curSec / totalSec) * 50; //The bar has 50 characters
 
+    printf (" [");
+    for (int i = 0; i < fill; i++)
+        printf ("#");
+    for (; fill < 50; fill++)
+        printf (" ");
+    printf ("] ");
+}
 
-void printTime (time *time) {
-    if (time->hours != 0)
-            printf ("%d:", time->hours);
-    if (time->minutes != 0)
-        printf ("%d:", time->minutes);
-    printf ("%d", time->seconds);
+void printTime (time *curTime, time *totalTime, double curSec, double totalSec) {
+    if (curTime->hours != 0)
+            printf ("%d:", curTime->hours);
+    if (curTime->minutes != 0)
+        printf ("%d:", curTime->minutes);
+    printf ("%d", curTime->seconds);
+
+    printBar (curSec, totalSec);
+
+    if (totalTime->hours != 0)
+            printf ("%d:", totalTime->hours);
+    if (totalTime->minutes != 0)
+        printf ("%d:", totalTime->minutes);
+    printf ("%d", totalTime->seconds);
 }
 
 int main (int argc, const char *argv[]) { 
@@ -63,11 +80,15 @@ int main (int argc, const char *argv[]) {
         curSec = frameTime * currentFrame;
         time *curTime = seconds2Time (curSec);
 
-        printTime (curTime);
-        printf (" / ");
-        printTime (totalTime);
         printf ("\r");
-    }
+        /*printTime (curTime);
+        printBar (curSec, totalSec);
+        printTime (totalTime);
+    */
+        printTime (curTime, totalTime, curSec, totalSec);
 
+        fflush (stdout);
+    }
+Exit:
     return 0;
 }
