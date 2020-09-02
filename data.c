@@ -3,19 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include "data.h"
+#include <time.h>
 
 void printHelp () {
     printf ("Usage: mp3-cli [OPTION]... [FILE]...\nPlays an mp3 file.\n     -h, --help       Display this message\n     -m, --mono       Set audio channel to mono\n     -b=, --bitrate=  Set bitrate\n");
 }
 
-time *seconds2Time (double sec) {
-    time *time = malloc (sizeof (time));
-    
-    time->hours = sec / 3600;
-    time->minutes = (sec - (3600*time->hours)) / 60;
-    time->seconds = (sec - (3600*time->hours) - (time->minutes*60));
-    
-    return time;
+void seconds2Time (double sec, struct tm *time) {    
+    time->tm_hour = sec / 3600;
+    time->tm_min = (sec - (3600* time->tm_hour)) / 60;
+    time->tm_sec = (sec - (3600* time->tm_hour) - (time->tm_min*60));
 }
 
 void strcpytillEqual (char *src, char *dst) {
