@@ -1,66 +1,90 @@
 #include <stdio.h>
-#include <errno.h>
+#include <time.h>
 #include <mpg123.h>
 #include <pulse/simple.h>
 #include <string.h>
 #include "data.h"
+#include <locale.h>
+#include <curses.h>
+
 
 void printBar (double curSec, double totalSec) {
     double fill = (curSec / totalSec) * 50; //The bar has 50 characters
 
-    printf (" [");
-    for (int i = 0; i < fill; i++)
-        printf ("#");
+    addstr (" [");
+    for (int i = 0; i < fill - 1; i++)
+        addch (ACS_BLOCK);
     for (; fill < 50; fill++)
-        printf (" ");
-    printf ("] ");
+        addch (' ');
+    addstr ("] ");
 }
 
-void printTime (time *curTime, time *totalTime, double curSec, double totalSec) {
-    if (totalTime->hours != 0){
-        if (totalTime->hours > 10)
-            printf (curTime->hours < 10 ? "0%d:" : "%d:", curTime->hours);
-        else printf ("%d:", curTime->hours);
+void printTime (struct tm *curTime, struct tm *totalTime, double curSec, double totalSec) {
+    char buffer[10] = "\0";
+    if (totalTime->tm_hour != 0){
+        if (totalTime->tm_hour > 10){
+            sprintf (buffer, curTime->tm_hour < 10 ? "0%d:" : "%d:", curTime->tm_hour);
+            addstr (buffer);
+        }
+        else { 
+            sprintf (buffer, "%d:", curTime->tm_hour);
+            addstr (buffer);
+        }
     }
-    if (totalTime->minutes != 0) {
-        if (totalTime->minutes > 10 || totalTime->hours != 0)
-            printf (curTime->minutes < 10 ? "0%d:" : "%d:", curTime->minutes);
-        else printf ("%d:", curTime->minutes);
+    if (totalTime->tm_min != 0) {
+        if (totalTime->tm_min > 10 || totalTime->tm_hour != 0){
+            sprintf (buffer, curTime->tm_min < 10 ? "0%d:" : "%d:", curTime->tm_min);
+            addstr (buffer);
+        }
+        else {
+            sprintf (buffer, "%d:", curTime->tm_min);
+            addstr (buffer);
+        }
     }
-    printf (curTime->seconds < 10 ? "0%d" : "%d", curTime->seconds);
+    sprintf (buffer, curTime->tm_sec < 10 ? "0%d" : "%d", curTime->tm_sec);
+    addstr (buffer);
 
     printBar (curSec, totalSec);
 
-    if (totalTime->hours != 0)
-            printf ("%d:", totalTime->hours);
-    if (totalTime->minutes != 0)
-        if (totalTime->hours != 0)
-            printf (totalTime->minutes < 10 ? "0%d:" : "%d:", totalTime->minutes);
-        else printf ("%d:", totalTime->minutes);
-    printf (totalTime->seconds < 10 ? "0%d" : "%d", totalTime->seconds);
+    if (totalTime->tm_hour != 0){
+            sprintf (buffer, "%d:", totalTime->tm_hour);
+            addstr (buffer);
+    }
+    if (totalTime->tm_min != 0){
+        if (totalTime->tm_hour != 0){
+            sprintf (buffer, totalTime->tm_min < 10 ? "0%d:" : "%d:", totalTime->tm_min);
+            addstr (buffer);
+        }
+        else {
+            sprintf (buffer, "%d:", totalTime->tm_min);
+            addstr (buffer);
+        }
+    }
+    sprintf (buffer, totalTime->tm_sec < 10 ? "0%d" : "%d", totalTime->tm_sec);
+    addstr (buffer);
 }
 
 int main (int argc, const char *argv[]) { 
     char buffer[1024];
     char *filePATH;
-    struct mpg123_fmt *format;
     mpg123_handle *handle;
     size_t decoded = 1;
     pa_simple *s;
     pa_sample_spec ss;
     off_t currentFrame, totalFrames;
     double frameTime, curSec, totalSec;
-    
-    totalFrames = 0;
-    currentFrame = 0;
-    totalSec = 0;
-    curSec = 0;
-    frameTime = 0;
+    int t = ERR;
+    struct tm *curTime = malloc (sizeof (struct tm));
+    struct tm *totalTime = malloc (sizeof (struct tm));
+    totalFrames = currentFrame = totalSec = curSec = frameTime = 0;
 
     if (argc == 1){
         printHelp ();
         exit (1);
     }
+    setlocale(LC_ALL, "");
+
+    curTime->tm_sec = curTime->tm_min = curTime->tm_hour = curTime->tm_mday = curTime->tm_mon = curTime->tm_year = curTime->tm_wday = curTime->tm_yday = curTime->tm_isdst = 0;
     
     ss.format = PA_SAMPLE_S16NE;
     ss.channels = 2;
@@ -78,25 +102,33 @@ int main (int argc, const char *argv[]) {
     totalFrames = mpg123_framelength (handle);
     frameTime = mpg123_tpf (handle);
     totalSec = (int) (frameTime * totalFrames);
-    time *totalTime = seconds2Time (totalSec);
+    seconds2Time (totalSec, totalTime);
     
+    initscr ();
+    cbreak ();
+    nonl ();
+    noecho ();
+    intrflush (stdscr, TRUE);
+    keypad (stdscr, TRUE);
+    nodelay (stdscr, TRUE);
+
     while (decoded > 0) {
         mpg123_read (handle, buffer, 1024, &decoded);
         pa_simple_write (s, buffer, decoded, NULL);
         
         currentFrame = mpg123_tellframe (handle);
         curSec = frameTime * currentFrame;
-        time *curTime = seconds2Time (curSec);
+        seconds2Time (curSec, curTime);
 
-        printf ("\r");
-        /*printTime (curTime);
-        printBar (curSec, totalSec);
-        printTime (totalTime);
-    */
+        addch ('\r');
         printTime (curTime, totalTime, curSec, totalSec);
-
-        fflush (stdout);
+        
+        t = getch ();
+        switch (t){
+            case 'q': exit(0);
+        }       
     }
-Exit:
+
+    endwin ();
     return 0;
 }
