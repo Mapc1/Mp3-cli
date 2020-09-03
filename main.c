@@ -15,7 +15,7 @@ void printBar (double curSec, double totalSec) {
     for (int i = 0; i < fill - 1; i++)
         addch (ACS_BLOCK);
     for (; fill < 50; fill++)
-        addch (' ');
+        addch ('_');
     addstr ("] ");
 }
 
@@ -133,6 +133,12 @@ int main (int argc, const char *argv[]) {
                 break;
             case KEY_LEFT:
                 mpg123_seek_frame (handle, -frames_per_5sec, SEEK_CUR);
+                break;
+            case KEY_UP:
+                mpg123_volume_change (handle, 0.05);
+                break;
+            case KEY_DOWN:
+                mpg123_volume_change (handle, -0.05);
                 break;
         }
         refresh ();
