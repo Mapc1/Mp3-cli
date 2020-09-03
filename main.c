@@ -110,7 +110,7 @@ int main (int argc, const char *argv[]) {
     cbreak ();
     nonl ();
     noecho ();
-    intrflush (stdscr, TRUE);
+    intrflush (stdscr, FALSE);
     keypad (stdscr, TRUE);
     nodelay (stdscr, TRUE);
 
@@ -140,6 +140,10 @@ int main (int argc, const char *argv[]) {
             case KEY_DOWN:
                 mpg123_volume_change (handle, -0.05);
                 break;
+            case ' ':
+                t = ERR;
+                while (t != ' ')
+                    t = getch ();
         }
         refresh ();
     }
