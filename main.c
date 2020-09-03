@@ -76,6 +76,7 @@ int main (int argc, const char *argv[]) {
     int t = ERR;
     struct tm *curTime = malloc (sizeof (struct tm));
     struct tm *totalTime = malloc (sizeof (struct tm));
+    int frames_per_5sec;
     totalFrames = currentFrame = totalSec = curSec = frameTime = 0;
 
     if (argc == 1){
@@ -103,7 +104,8 @@ int main (int argc, const char *argv[]) {
     frameTime = mpg123_tpf (handle);
     totalSec = (int) (frameTime * totalFrames);
     seconds2Time (totalSec, totalTime);
-    
+    frames_per_5sec = (totalFrames / totalSec) * 5;
+
     initscr ();
     cbreak ();
     nonl ();
@@ -126,9 +128,18 @@ int main (int argc, const char *argv[]) {
         t = getch ();
         switch (t){
             case 'q': exit(0);
-        }       
+            case KEY_RIGHT:
+                mpg123_seek_frame (handle, frames_per_5sec, SEEK_CUR);
+                break;
+            case KEY_LEFT:
+                mpg123_seek_frame (handle, -frames_per_5sec, SEEK_CUR);
+                break;
+        }
+        refresh ();
     }
 
+    free (curTime);
+    free (totalTime);
     endwin ();
     return 0;
 }
