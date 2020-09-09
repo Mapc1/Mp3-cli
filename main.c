@@ -65,7 +65,7 @@ void printTime (struct tm *curTime, struct tm *totalTime, double curSec, double 
 }
 
 int main (int argc, const char *argv[]) { 
-    char buffer[1024];
+    char buffer[128];
     char *filePATH;
     mpg123_handle *handle;
     size_t decoded = 1;
@@ -115,7 +115,7 @@ int main (int argc, const char *argv[]) {
     nodelay (stdscr, TRUE);
 
     while (decoded > 0) {
-        mpg123_read (handle, buffer, 1024, &decoded);
+        mpg123_read (handle, buffer, 128, &decoded);
         pa_simple_write (s, buffer, decoded, NULL);
         
         currentFrame = mpg123_tellframe (handle);
@@ -124,7 +124,6 @@ int main (int argc, const char *argv[]) {
 
         addch ('\r');
         printTime (curTime, totalTime, curSec, totalSec);
-        
         t = getch ();
         switch (t){
             case 'q': exit(0);
@@ -135,17 +134,16 @@ int main (int argc, const char *argv[]) {
                 mpg123_seek_frame (handle, -frames_per_5sec, SEEK_CUR);
                 break;
             case KEY_UP:
-                mpg123_volume_change (handle, 0.05);
+                mpg123_volume_change (handle, 0.1);
                 break;
             case KEY_DOWN:
-                mpg123_volume_change (handle, -0.05);
+                mpg123_volume_change (handle, -0.1);
                 break;
             case ' ':
                 t = ERR;
                 while (t != ' ')
                     t = getch ();
         }
-        refresh ();
     }
 
     free (curTime);
